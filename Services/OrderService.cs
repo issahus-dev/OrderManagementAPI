@@ -1,0 +1,79 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using OrderManagementAPI.Data;
+using OrderManagementAPI.Interface;
+using OrderManagementAPI.Models;
+namespace OrderManagementAPI.Services
+{
+    public class OrderService(AppDbContext database, IOptions<OrderSettings> orderSettings, ILogger<OrderService> logger) : IOrderService
+    {
+        public async Task<IEnumerable<Order>> GetAllOrdersAsync()
+        {
+            return await database.Orders.OrderByDescending(x => x.CreatedOn).ToListAsync();
+        }
+        public async Task<Order?> GetOrderByIDAsync(int orderID)
+        {
+            return await database.Orders.FirstOrDefaultAsync(x => x.OrderID == orderID);
+        }
+        public async Task<SaveOrderResponse> CreateOrderAsync(CreateOrderRequest orderRequest)
+        {
+
+            SaveError? error = await Validate(orderRequest);
+
+            if (error != null)
+            {
+                string message = $"Was unable to save order due to {nameof(error.Value)}";
+                logger.LogWarning(message);
+                return new SaveOrderResponse { Error = error.Value, Message = message };
+            }
+
+            Order order = TransformRequestIntoOrder(orderRequest);
+
+            database.Orders.Add(order);
+            await database.SaveChangesAsync();
+
+            logger.LogInformation($"Sucessfully created a new order.ID = {order.OrderID} at = {order.CreatedOn.ToShortTimeString} ");
+            
+            return new SaveOrderResponse
+            {
+                Success = true,
+                Order = order
+            };
+        }
+        private async Task<bool> IsDuplicate(CreateOrderRequest orderRequest)
+        {
+            return await database.Orders.AnyAsync(x =>
+            x.CustomerName == orderRequest.CustomerName &&
+            x.OrderValue == orderRequest.OrderValue &&
+            x.OrderDate == orderRequest.OrderDate
+            );
+        }
+        private bool IsOrderValueWithinLimit(CreateOrderRequest orderRequest)
+        {
+            return orderSettings.Value.MaxOrderValueLimit >= orderRequest.OrderValue;
+        }
+        private Order TransformRequestIntoOrder(CreateOrderRequest orderRequest)
+        {
+             Order order = new Order
+            {
+                CustomerName = orderRequest.CustomerName,
+                OrderValue = orderRequest.OrderValue,
+                OrderDate = orderRequest.OrderDate
+            };
+            return order;
+        }
+        private async Task<SaveError?> Validate(CreateOrderRequest request)
+        {
+            if (await IsDuplicate(request))
+                return SaveError.Duplicate;
+
+            if (IsOrderValueWithinLimit(request))
+                return SaveError.OrderExceedsMaxLimit;
+
+            return null;
+        }
+    }
+
+}
+
+
