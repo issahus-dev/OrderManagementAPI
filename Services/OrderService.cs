@@ -50,7 +50,7 @@ namespace OrderManagementAPI.Services
         }
         private bool IsOrderValueWithinLimit(CreateOrderRequest orderRequest)
         {
-            return orderSettings.Value.MaxOrderValueLimit >= orderRequest.OrderValue;
+            return orderRequest.OrderValue <= orderSettings.Value.MaxOrderValueLimit;
         }
         private Order TransformRequestIntoOrder(CreateOrderRequest orderRequest)
         {

@@ -78,8 +78,10 @@ Validation is including in
 
 - DataAnnotations on request model Structural validity required fields, length limits, value ranges. Handled automatically by the code.
 - OrderService Business rule validation on `MaxOrderValueLimit` enforcement and duplicate order detection. Returned as typed results rather than exceptions, keeping control flow predictable and easy to test.
+- Added a unqiue index for each column, to prevent duplicate inserts in the table
+First validation step checks if the request is valid. And the 2nd step in the business layer checks if the request aligns with business expections and the 3rd check prevents against race condition.
 
-First validation step checks if the request is valid. And the 2nd step in the business layer checks if the request aligns with business expections
+
 
 
 
