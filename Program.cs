@@ -32,8 +32,7 @@ using (var scope = app.Services.CreateScope())
 {
     var database = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     database.Database.Migrate();
-    var dbPath = database.Database.GetDbConnection().DataSource;
-    Console.WriteLine($"SQLite DB PATH: {dbPath}");
+    
 }
 
 // Configure the HTTP request pipeline.
