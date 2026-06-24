@@ -48,9 +48,9 @@ namespace OrderManagementAPI.Services
             x.OrderDate == orderRequest.OrderDate
             );
         }
-        private bool IsOrderValueWithinLimit(CreateOrderRequest orderRequest)
+        private bool IsOrderValueAboveLimit(CreateOrderRequest orderRequest)
         {
-            return orderRequest.OrderValue <= orderSettings.Value.MaxOrderValueLimit;
+            return orderRequest.OrderValue > orderSettings.Value.MaxOrderValueLimit;
         }
         private Order TransformRequestIntoOrder(CreateOrderRequest orderRequest)
         {
@@ -67,7 +67,7 @@ namespace OrderManagementAPI.Services
             if (await IsDuplicate(request))
                 return SaveError.Duplicate;
 
-            if (IsOrderValueWithinLimit(request))
+            if (IsOrderValueAboveLimit(request))
                 return SaveError.OrderExceedsMaxLimit;
 
             return null;
