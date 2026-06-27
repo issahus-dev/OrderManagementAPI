@@ -15,7 +15,7 @@ namespace OrderManagementAPI.Services
         {
             return await database.Orders.FirstOrDefaultAsync(x => x.OrderID == orderID);
         }
-        public async Task<SaveOrderResponse> CreateOrderAsync(CreateOrderRequest orderRequest)
+        public async Task<SaveResponse<Order>> CreateOrderAsync(CreateOrderRequest orderRequest)
         {
 
             SaveError? error = await Validate(orderRequest);
@@ -24,7 +24,7 @@ namespace OrderManagementAPI.Services
             {
                 string message = $"Was unable to save order due to {nameof(error.Value)}";
                 logger.LogWarning(message);
-                return new SaveOrderResponse { Error = error.Value, Message = message };
+                return new SaveResponse<Order> { Error = error.Value, Message = message };
             }
 
             Order order = TransformRequestIntoOrder(orderRequest);
@@ -34,16 +34,16 @@ namespace OrderManagementAPI.Services
 
             logger.LogInformation($"Sucessfully created a new order.ID = {order.OrderID} at = {order.CreatedOn.ToShortTimeString} ");
             
-            return new SaveOrderResponse
+            return new SaveResponse<Order>
             {
                 Success = true,
-                Order = order
+                Payload = order
             };
         }
         private async Task<bool> IsDuplicate(CreateOrderRequest orderRequest)
         {
             return await database.Orders.AnyAsync(x =>
-            x.CustomerName == orderRequest.CustomerName &&
+            x.CustomerID == orderRequest.CustomerID &&
             x.OrderValue == orderRequest.OrderValue &&
             x.OrderDate == orderRequest.OrderDate
             );
@@ -56,7 +56,7 @@ namespace OrderManagementAPI.Services
         {
              Order order = new Order
             {
-                CustomerName = orderRequest.CustomerName,
+                CustomerID = orderRequest.CustomerID,
                 OrderValue = orderRequest.OrderValue,
                 OrderDate = orderRequest.OrderDate
             };

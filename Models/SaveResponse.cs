@@ -1,9 +1,10 @@
 ﻿namespace OrderManagementAPI.Models
 {
-    public class SaveOrderResponse
+    public class SaveResponse<T>
     {
         public bool Success { get; set; }
-        public Order Order { get; set; } = new Order();
+        
+        public T Payload { get; set; }
         public SaveError Error { get; set; }
         public string Message { get; set; } = string.Empty;
     }

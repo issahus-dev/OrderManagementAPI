@@ -6,7 +6,7 @@ namespace OrderManagementAPI.Interface
     {
         Task<IEnumerable<Order>> GetAllOrdersAsync();
         Task<Order?> GetOrderByIDAsync(int orderID);
-        Task<SaveOrderResponse> CreateOrderAsync(CreateOrderRequest orderRequest); 
+        Task<SaveResponse<Order>> CreateOrderAsync(CreateOrderRequest orderRequest); 
 
     }
 }

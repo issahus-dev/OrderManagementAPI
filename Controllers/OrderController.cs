@@ -63,7 +63,7 @@ namespace OrderManagementAPI.Controllers
                 };
             }
 
-            return Ok(result.Order);
+            return Ok(result.Payload);
         }
     }
 
